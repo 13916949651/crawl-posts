@@ -30,6 +30,6 @@ app.register_blueprint(tiktok_blueprint)
 app.register_blueprint(facebook_blueprint)
 
 if __name__ == "__main__":
-    server = pywsgi.WSGIServer(('127.0.0.1', 5001), app)
+    server = pywsgi.WSGIServer(('localhost', 5001), app)
     server.serve_forever()
     #app.run(debug=True, port=5001)
