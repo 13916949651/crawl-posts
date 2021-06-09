@@ -30,4 +30,4 @@ app.register_blueprint(facebook_blueprint)
 if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('127.0.0.1', 8989), app)
     # server.serve_forever()
-    app.run(debug=True, port=8989)
+    app.run(debug=True, port=5001)
