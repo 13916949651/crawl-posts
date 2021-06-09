@@ -14,11 +14,15 @@ pipeline{
       }
 
       // 定义本次构建使用哪个标签的构建环境，本示例中为 “slave-pipeline”
-      
+      agent{
+        node{
+          label 'slave-pipeline'
+        }
+      }
 
       // "stages"定义项目构建的多个模块，可以添加多个 “stage”， 可以多个 “stage” 串行或者并行执行
       stages{
-
+    
         // 运行容器镜像构建和推送命令， 用到了environment中定义的groovy环境变量
         stage('Image Build And Publish'){
           steps{
@@ -28,5 +32,13 @@ pipeline{
           }
         }
 
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                container('kubectl') {
+                    step([$class: 'KubernetesDeploy', authMethod: 'certs', apiServerUrl: 'https://kubernetes.default.svc.cluster.local:443', credentialsId:'k8sCertAuth', config: 'deployment.yaml',variableState: 'ORIGIN_REPO,REPO,IMAGE_TAG,REVISION,PROJECT_NAME'])
+                }
+            }
+        }
       }
     }
