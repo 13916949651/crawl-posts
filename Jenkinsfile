@@ -13,10 +13,10 @@ pipeline{
         PROJECT_NAME = sh(returnStdout: true,script: 'echo $project_name').trim()
       }
 
-      // 定义本次构建使用哪个标签的构建环境，本示例中为 “pipeline”
+      // 定义本次构建使用哪个标签的构建环境，本示例中为 “slave-pipeline”
       agent{
         node{
-          label 'pipeline'
+          label 'slave-pipeline'
         }
       }
 
