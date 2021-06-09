@@ -16,7 +16,7 @@ app = Flask(__name__)
 app.debug = True
 
 # 注册数据模型
-db = SQLAlchemy(app)
+# db = SQLAlchemy(app)
 # redis配置
 # app.config['REDIS_HOST'] = "127.0.0.1"  # redis数据库地址
 # app.config['REDIS_PORT'] = 6379  # redis 端口号
@@ -24,17 +24,10 @@ db = SQLAlchemy(app)
 # app.config['REDIS_EXPIRE'] = 60  # redis 过期时间60秒
 
 # 注册蓝图
-
 # app.register_blueprint(admin_blueprint, url_prefix='/admin/')
 # app.register_blueprint(tiktok_blueprint, url_prefix='/')
 app.register_blueprint(tiktok_blueprint)
 app.register_blueprint(facebook_blueprint)
-
-# app.register_blueprint(syn_blueprint)
-
-# app.register_blueprint(blog)
-# app.register_blueprint(test)
-# app.register_blueprint(cases)
 
 if __name__ == "__main__":
     # server = pywsgi.WSGIServer(('127.0.0.1', 8989), app)
