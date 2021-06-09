@@ -1,8 +1,10 @@
+# coding=utf-8
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from controller.tiktok_download_controller import tiktok as tiktok_blueprint
 from controller.facebook_download_controller import facebook as facebook_blueprint
+
 app = Flask(__name__)
 # 数据库配置
 # app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:Ltb518818lfan@127.0.0.1:3306/flask?charset=utf8"
@@ -28,7 +30,7 @@ db = SQLAlchemy(app)
 app.register_blueprint(tiktok_blueprint)
 app.register_blueprint(facebook_blueprint)
 
-#app.register_blueprint(syn_blueprint)
+# app.register_blueprint(syn_blueprint)
 
 # app.register_blueprint(blog)
 # app.register_blueprint(test)
