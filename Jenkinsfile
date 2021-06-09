@@ -14,11 +14,7 @@ pipeline{
       }
 
       // 定义本次构建使用哪个标签的构建环境，本示例中为 “slave-pipeline”
-      agent{
-        node{
-          label 'slave-pipeline'
-        }
-      }
+      
 
       // "stages"定义项目构建的多个模块，可以添加多个 “stage”， 可以多个 “stage” 串行或者并行执行
       stages{
