@@ -1,4 +1,4 @@
-from main import db
+from manage import db
 
 
 class duty(db.Model):

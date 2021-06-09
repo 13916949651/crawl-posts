@@ -1,52 +1,44 @@
-pipeline {
-  agent any
-  // 环境变量，全局可用
-  environment {
-    // 你的企业唯一标识
-    ENTERPRISE = "coding-public"
-    // 项目名称
-    PROJECT = "python-flask-demo"
-    // 制品仓库名称
-    ARTIFACT_REPO = "registry"
-    // Docker 镜像名称
-    IMAGE_NAME = "python-flask-demo"
-    // CODING DOMAIN，无需更改
-    CODING_DOMAIN = "coding.net"
+pipeline{
+      // 定义groovy脚本中使用的环境变量
+      environment{
+        // 镜像标签
+        IMAGE_TAG =  sh(returnStdout: true,script: 'echo $image_tag').trim()
+        // 镜像仓库地址
+        ORIGIN_REPO =  sh(returnStdout: true,script: 'echo $origin_repo').trim()
+        // 镜像仓库名称
+        REPO =  sh(returnStdout: true,script: 'echo $repo').trim()
+        // gitlab revision用于滚动更新镜像
+        REVISION =  sh(returnStdout: true,script: 'echo $revision').trim()
+        // 项目名称
+        PROJECT_NAME = sh(returnStdout: true,script: 'echo $project_name').trim()
+      }
 
-    // 制品库 Registry 的基础 HOST，无需更改
-    ARTIFACT_BASE = "${ENTERPRISE}-docker.pkg.${CODING_DOMAIN}"
-    // Docker 镜像全名，无需更改
-    ARTIFACT_IMAGE = "${ARTIFACT_BASE}/${PROJECT}/${ARTIFACT_REPO}/${IMAGE_NAME}"
-  }
-  stages {
-    stage('检出') {
-      steps {
-        // Git checkout，无需更改
-        checkout([
-          $class: 'GitSCM',
-          branches: [[name: env.GIT_BUILD_REF]],
-          userRemoteConfigs: [[url: env.GIT_REPO_URL, credentialsId: env.CREDENTIALS_ID]]
-        ])
+      // 定义本次构建使用哪个标签的构建环境，本示例中为 “slave-pipeline”
+      agent{
+        node{
+          label 'slave-pipeline'
+        }
       }
-    }
-    stage('打包镜像') {
-      steps {
-        // 根据项目根目录下的 Dockerfile 制作镜像
-        sh "docker build -t ${ARTIFACT_IMAGE}:${env.GIT_BUILD_REF} ."
-    // 将制作出来的镜像打上标签
-        sh "docker tag ${ARTIFACT_IMAGE}:${env.GIT_BUILD_REF} ${ARTIFACT_IMAGE}:latest"
-      }
-    }
-    stage('推送到制品库') {
-      steps {
-    script {
-      // 推送至制品库
-          docker.withRegistry("https://${ARTIFACT_BASE}", "${env.DOCKER_REGISTRY_CREDENTIALS_ID}") {
-            docker.image("${ARTIFACT_IMAGE}:${env.GIT_BUILD_REF}").push()
-               docker.image("${ARTIFACT_IMAGE}:latest").push()
+
+      // "stages"定义项目构建的多个模块，可以添加多个 “stage”， 可以多个 “stage” 串行或者并行执行
+      stages{
+
+        // 运行容器镜像构建和推送命令， 用到了environment中定义的groovy环境变量
+        stage('Image Build And Publish'){
+          steps{
+              container("kaniko") {
+                  sh "kaniko -f `pwd`/Dockerfile -c `pwd` --destination=${ORIGIN_REPO}/${REPO}:${IMAGE_TAG}"
+              }
           }
+        }
+
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                container('kubectl') {
+                    step([$class: 'KubernetesDeploy', authMethod: 'certs', apiServerUrl: 'https://kubernetes.default.svc.cluster.local:443', credentialsId:'k8sCertAuth', config: 'deployment.yaml',variableState: 'ORIGIN_REPO,REPO,IMAGE_TAG,REVISION,PROJECT_NAME'])
+                }
+            }
         }
       }
     }
-  }
-}
