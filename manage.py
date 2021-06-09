@@ -1,7 +1,5 @@
 # coding=utf-8
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-
 from controller.tiktok_download_controller import tiktok as tiktok_blueprint
 from controller.facebook_download_controller import facebook as facebook_blueprint
 
