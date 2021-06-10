@@ -1,5 +1,3 @@
-from flask import request
-
 from controller import facebook
 
 
